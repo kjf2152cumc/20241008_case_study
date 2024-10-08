@@ -1,0 +1,111 @@
+---
+title: "Case Study"
+author: "Kaleb J. Frierson"
+date: "2024-10-08"
+output: html_document
+---
+
+# Notes
+
+Recurring themes in data science:
+
+You need some data skills: wrangling, reproducibility, communication, analytics/modeling. These have been the focus of this course. However, you also need a mindset guided by intellectual curiosity, an ability to solve problems, and an interest in domain.
+
+What is domain?
+
+You can practice problem solving!
+
+# Coding
+
+## Library Calling and Format Setting
+
+```{r}
+library(tidyverse)
+library(haven)
+library(leaflet)
+```
+
+## Bringing in Data
+
+```{r}
+bnb =
+  read.csv("nyc_airbnb.csv", na = c("NA", "", "."))
+
+```
+
+## Questions about data
+
+-   Where are max and min air bnb prices?
+    -   What are average prices?
+    -   What factors affect prices?
+
+```{r, mean by borrough}
+bnb |> 
+  group_by(neighbourhood_group) |>
+  summarize(
+    mean(price),
+    median(price)
+  )
+```
+
+```{r, count of units by price in each borrough graph}
+bnb |> 
+  ggplot(aes(x = price, fill = neighbourhood_group)) +
+  geom_histogram() +
+  facet_grid(. ~ neighbourhood_group) +
+  scale_x_continuous(limits = c(0, 250))
+```
+
+-   Where are prices going up and down over time?
+
+-   What is the relationship between number of reviews and average reviews?
+
+```{r}
+bnb |> 
+  ggplot(aes(x=number_of_reviews, y=review_scores_location)) + 
+  geom_point()
+```
+
+-   Does room type effect availability?
+
+-   What area's are popular?
+
+    -   Popularity = number of units? Average price? How to measure?
+
+```{r}
+bnb |> 
+  filter(neighbourhood_group == "Manhattan",
+  price <1000) |> 
+  ggplot(aes(x= lat, y = long, color = price))+
+  geom_point(alpha = .1)
+```
+
+```{r}
+bnb |> 
+  filter(neighbourhood_group == "Manhattan",
+  price <1000,
+  room_type == "Entire home/apt") |> 
+  group_by(neighbourhood) |> 
+  summarize(mean_price = mean(price)) |> 
+  arrange(mean_price)
+```
+
+-   Repeat hosts?
+    -   If so, what odes that mean?
+
+## Leaflet maps 
+leaflet works very similar to ggplot (I think for making maps)
+
+```{r}
+bnb |>
+  filter(neighbourhood_group == "Manhattan",
+  price <1000) |> 
+  slice(1:100) |> 
+  leaflet() |> 
+  addTiles() |> 
+  addCircleMarkers(~lat, ~long, radius=.5)
+```
+
+You can checkout rstudio.github.io for help learning this too. 
+
+
